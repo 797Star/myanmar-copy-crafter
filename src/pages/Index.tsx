@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import ContentFormConfig from "@/components/ContentFormConfig";
 import GeneratedContentOutput from "@/components/GeneratedContentOutput";
 import QualityAssurance from "@/components/QualityAssurance";
@@ -40,24 +41,36 @@ const Index = () => {
     setError('');
 
     try {
-      // For demo purposes, generate sample content
-      const variations = Array.from({ length: numVariations }, (_, index) => {
-        return `[ပုံစံကွဲ ${index + 1}]
-
-${productName ? `🌟 ${productName} 🌟` : ''}
-
-${keyMessage || 'သင်၏ ထုတ်ကုန်နှင့် ဝန်ဆောင်မှုများကို မိတ်ဆက်ပေးလိုပါသည်။'}
-
-${targetAudience ? `🎯 ဦးတည်အုပ်စု: ${targetAudience}` : ''}
-
-${includeEmojis ? '✨ အထူးကမ်းလှမ်းချက်များ ရရှိနိုင်ပါသည်! ✨' : 'အထူးကမ်းလှမ်းချက်များ ရရှိနိုင်ပါသည်!'}
-
-${includeCTA ? '📞 ယခုပင် ဆက်သွယ်ပါ!' : ''}
-
-${includeHashtags ? '#Myanmar #Business #Quality #Service' : ''}`;
+      const { data, error } = await supabase.functions.invoke('generate-content', {
+        body: {
+          platform,
+          contentType,
+          contentLength,
+          objective,
+          style,
+          contentCategory,
+          productName,
+          keyMessage,
+          targetAudience,
+          keywords,
+          facebookPageLink,
+          includeCTA,
+          includeEmojis,
+          includeHashtags,
+          numVariations
+        }
       });
 
-      setGeneratedContent(variations);
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Edge function error');
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to generate content');
+      }
+
+      setGeneratedContent(data.variations);
       
       // Generate mock QA metrics
       setQaMetrics({
@@ -70,7 +83,8 @@ ${includeHashtags ? '#Myanmar #Business #Quality #Service' : ''}`;
 
       toast.success('အကြောင်းအရာ ဖန်တီးပြီးပါပြီ!');
     } catch (err) {
-      setError('အကြောင်းအရာ ဖန်တီးရာတွင် အမှားရှိပါသည်။');
+      console.error('Content generation error:', err);
+      setError('အကြောင်းအရာ ဖန်တီးရာတွင် အမှားရှိပါသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။');
       toast.error('ဖန်တီးရာတွင် အမှားရှိပါသည်။');
     } finally {
       setLoading(false);
@@ -129,11 +143,11 @@ ${includeHashtags ? '#Myanmar #Business #Quality #Service' : ''}`;
           </p>
         </div>
 
-        {/* API Key Warning */}
-        <Alert className="mb-6 border-amber-200 bg-amber-50">
+        {/* API Connection Status */}
+        <Alert className="mb-6 border-green-200 bg-green-50">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="text-amber-800">
-            လက်ရှိတွင် Demo mode တွင် အလုပ်လုပ်နေပါသည်။ အစစ်အမှန် API integration အတွက် Gemini API key လိုအပ်ပါသည်။
+          <AlertDescription className="text-green-800">
+            ✅ Gemini AI နှင့် ချိတ်ဆက်ပြီးပါပြီ! အစစ်အမှန် AI content generation အသုံးပြုနိုင်ပါသည်။
           </AlertDescription>
         </Alert>
 
