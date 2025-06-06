@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,7 +62,7 @@ ${keyMessage || 'သင်၏ ထုတ်ကုန်နှင့် ဝန်�
 
 ${targetAudience ? `🎯 ဦးတည်အုပ်စု: ${targetAudience}` : ''}
 
-${includeEmojis ? '✨ အထူးကမ်းလှမ်းချက်များ ရရှိနိုင်ပါသည်! ✨' : 'အထူးကမ်းလှမ်းချက်များ ရရှိနိوင်ပါသည်!'}
+${includeEmojis ? '✨ အထူးကမ်းလှမ်းချက်များ ရရှိနိုင်ပါသည်! ✨' : 'အထူးကမ်းလှမ်းချက်များ ရရှိနိုင်ပါသည်!'}
 
 ${includeCTA ? '📞 ယခုပင် ဆက်သွယ်ပါ!' : ''}
 
@@ -114,6 +113,19 @@ ${includeHashtags ? '#Myanmar #Business #Quality #Service' : ''}`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success('ဖိုင် ထုတ်ယူပြီးပါပြီ!');
+  };
+
+  // Checkbox handlers to properly handle CheckedState type
+  const handleCTAChange = (checked: boolean | "indeterminate") => {
+    setIncludeCTA(checked === true);
+  };
+
+  const handleEmojisChange = (checked: boolean | "indeterminate") => {
+    setIncludeEmojis(checked === true);
+  };
+
+  const handleHashtagsChange = (checked: boolean | "indeterminate") => {
+    setIncludeHashtags(checked === true);
   };
 
   return (
@@ -309,7 +321,7 @@ ${includeHashtags ? '#Myanmar #Business #Quality #Service' : ''}`;
                   <Checkbox 
                     id="includeCTA" 
                     checked={includeCTA}
-                    onCheckedChange={setIncludeCTA}
+                    onCheckedChange={handleCTAChange}
                   />
                   <Label htmlFor="includeCTA">Call To Action ထည့်မည်</Label>
                 </div>
@@ -317,7 +329,7 @@ ${includeHashtags ? '#Myanmar #Business #Quality #Service' : ''}`;
                   <Checkbox 
                     id="includeEmojis" 
                     checked={includeEmojis}
-                    onCheckedChange={setIncludeEmojis}
+                    onCheckedChange={handleEmojisChange}
                   />
                   <Label htmlFor="includeEmojis">Emoji များ ထည့်မည်</Label>
                 </div>
@@ -325,7 +337,7 @@ ${includeHashtags ? '#Myanmar #Business #Quality #Service' : ''}`;
                   <Checkbox 
                     id="includeHashtags" 
                     checked={includeHashtags}
-                    onCheckedChange={setIncludeHashtags}
+                    onCheckedChange={handleHashtagsChange}
                   />
                   <Label htmlFor="includeHashtags">Hashtag များ ထည့်မည်</Label>
                 </div>
