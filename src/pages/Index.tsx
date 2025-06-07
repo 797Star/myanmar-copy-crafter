@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -15,9 +16,12 @@ const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect to auth if not logged in
+  // Redirect to auth if not logged in, but only after auth loading is complete
   useEffect(() => {
+    console.log('Auth state:', { user: user?.email, authLoading });
+    
     if (!authLoading && !user) {
+      console.log('User not authenticated, redirecting to auth...');
       navigate('/auth');
     }
   }, [user, authLoading, navigate]);
@@ -45,6 +49,7 @@ const Index = () => {
 
   const handleGenerateContent = async () => {
     if (!user) {
+      console.error('No user found when trying to generate content');
       setError('ကျေးဇူးပြု၍ အရင်လော့ဂ်အင်ဝင်ပါ');
       return;
     }
@@ -59,6 +64,8 @@ const Index = () => {
     setError('');
 
     try {
+      console.log('Generating content for user:', user.email);
+      
       const { data, error } = await supabase.functions.invoke('generate-content', {
         body: {
           platform,
@@ -89,12 +96,13 @@ const Index = () => {
         throw new Error(data.error || 'Failed to generate content');
       }
 
+      console.log('Content generated successfully:', data.variations.length, 'variations');
       setGeneratedContent(data.variations);
       
       // Store content generation in database with correct column names
       const contentToStore = data.variations.join('\n\n=== ပုံစံကွဲများ ===\n\n');
       
-      await supabase.from('content_generations').insert({
+      const insertResult = await supabase.from('content_generations').insert({
         user_id: user.id,
         platform: platform || null,
         content_type: contentType,
@@ -113,6 +121,13 @@ const Index = () => {
         variations_count: numVariations,
         generated_content: contentToStore
       });
+
+      if (insertResult.error) {
+        console.error('Database insert error:', insertResult.error);
+        // Don't throw here, just log the error as the content generation was successful
+      } else {
+        console.log('Content saved to database successfully');
+      }
       
       // Generate mock QA metrics
       setQaMetrics({
@@ -186,8 +201,11 @@ const Index = () => {
 
   // Don't render if not authenticated (will redirect)
   if (!user) {
+    console.log('User not found, not rendering main content');
     return null;
   }
+
+  console.log('Rendering main app for user:', user.email);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-amber-50 p-4">
@@ -213,6 +231,9 @@ const Index = () => {
           <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
             <span>Powered by</span>
             <span className="font-semibold text-blue-600">Gemini 2.5 Flash Preview</span>
+          </div>
+          <div className="mt-2 text-sm text-green-600">
+            လက်ရှိအသုံးပြုသူ: {user.email}
           </div>
         </div>
 
