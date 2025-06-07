@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from './AuthProvider';
 import { Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginFormProps {
   onToggleMode: () => void;
@@ -18,19 +19,42 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { signIn } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email.trim() || !password) {
+      setError('အီးမေးလ်နှင့် လျှို့ဝှက်နံပါတ် လိုအပ်ပါသည်။');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
-    const { error } = await signIn(email, password);
-    
-    if (error) {
-      setError(error.message);
+    try {
+      console.log('Login form submitting...');
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        console.error('Login error:', error);
+        if (error.message?.includes('Invalid login credentials')) {
+          setError('အီးမေးလ် သို့မဟုတ် လျှို့ဝှက်နံပါတ် မှားယွင်းနေပါသည်။');
+        } else if (error.message?.includes('Email not confirmed')) {
+          setError('ကျေးဇူးပြု၍ သင့်အီးမေးလ်ကို အတည်ပြုပါ။');
+        } else {
+          setError(error.message || 'လော့ဂ်အင်တွင် အမှားရှိပါသည်။');
+        }
+      } else {
+        console.log('Login successful, navigating to home...');
+        navigate('/');
+      }
+    } catch (err) {
+      console.error('Login exception:', err);
+      setError('လော့ဂ်အင်တွင် အမှားရှိပါသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။');
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
@@ -49,6 +73,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="your@email.com"
+              disabled={loading}
             />
           </div>
           <div>
@@ -60,6 +85,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
+              disabled={loading}
             />
           </div>
           
@@ -71,7 +97,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
           
           <Button type="submit" className="w-full" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            လော့ဂ်အင်
+            {loading ? 'လော့ဂ်အင်ဝင်နေသည်...' : 'လော့ဂ်အင်'}
           </Button>
           
           <Button 
@@ -79,6 +105,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
             variant="link" 
             className="w-full"
             onClick={onToggleMode}
+            disabled={loading}
           >
             အကောင့်မရှိသေးဘူးလား? စာရင်းသွင်းမည်
           </Button>
