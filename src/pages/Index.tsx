@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { AlertCircle, Sparkles, Bot } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -160,52 +161,65 @@ const Index = () => {
 
         <div className="grid lg:grid-cols-2 gap-10">
           {/* Input Form */}
-          <ContentFormConfig
-            platform={platform}
-            setPlatform={setPlatform}
-            contentType={contentType}
-            setContentType={setContentType}
-            contentLength={contentLength}
-            setContentLength={setContentLength}
-            objective={objective}
-            setObjective={setObjective}
-            style={style}
-            setStyle={setStyle}
-            contentCategory={contentCategory}
-            setContentCategory={setContentCategory}
-            productName={productName}
-            setProductName={setProductName}
-            keyMessage={keyMessage}
-            setKeyMessage={setKeyMessage}
-            targetAudience={targetAudience}
-            setTargetAudience={setTargetAudience}
-            keywords={keywords}
-            setKeywords={setKeywords}
-            facebookPageLink={facebookPageLink}
-            setFacebookPageLink={setFacebookPageLink}
-            includeCTA={includeCTA}
-            includeEmojis={includeEmojis}
-            includeHashtags={includeHashtags}
-            handleCTAChange={handleCTAChange}
-            handleEmojisChange={handleEmojisChange}
-            handleHashtagsChange={handleHashtagsChange}
-            numVariations={numVariations}
-            setNumVariations={setNumVariations}
-            handleGenerateContent={handleGenerateContent}
-            loading={loading}
-            error={error}
-          />
+          <Card className="p-6">
+            <CardHeader>
+              <CardTitle>Content Configuration</CardTitle>
+              <CardDescription>Specify the details for your content generation.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ContentFormConfig
+                platform={platform}
+                setPlatform={setPlatform}
+                contentType={contentType}
+                setContentType={setContentType}
+                contentLength={contentLength}
+                setContentLength={setContentLength}
+                objective={objective}
+                setObjective={setObjective}
+                style={style}
+                setStyle={setStyle}
+                contentCategory={contentCategory}
+                setContentCategory={setContentCategory}
+                productName={productName}
+                setProductName={setProductName}
+                keyMessage={keyMessage}
+                setKeyMessage={setKeyMessage}
+                targetAudience={targetAudience}
+                setTargetAudience={setTargetAudience}
+                keywords={keywords}
+                setKeywords={setKeywords}
+                facebookPageLink={facebookPageLink}
+                setFacebookPageLink={setFacebookPageLink}
+                includeCTA={includeCTA}
+                includeEmojis={includeEmojis}
+                includeHashtags={includeHashtags}
+                handleCTAChange={handleCTAChange}
+                handleEmojisChange={handleEmojisChange}
+                handleHashtagsChange={handleHashtagsChange}
+                numVariations={numVariations}
+                setNumVariations={setNumVariations}
+                handleGenerateContent={handleGenerateContent}
+                loading={loading}
+                error={error}
+              />
+            </CardContent>
+          </Card>
 
           {/* Output Section */}
-          <div className="space-y-8">
-            <GeneratedContentOutput
-              generatedContent={generatedContent}
-              copyToClipboard={copyToClipboard}
-              exportAllContent={exportAllContent}
-            />
-
-            <QualityAssurance qaMetrics={qaMetrics} />
-          </div>
+          <Card className="p-6">
+            <CardHeader>
+              <CardTitle>Generated Content & Quality</CardTitle>
+              <CardDescription>Review the generated content and its quality metrics.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <GeneratedContentOutput
+                generatedContent={generatedContent}
+                copyToClipboard={copyToClipboard}
+                exportAllContent={exportAllContent}
+              />
+              <QualityAssurance qaMetrics={qaMetrics} />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
