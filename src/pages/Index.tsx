@@ -91,14 +91,14 @@ const Index = () => {
 
       setGeneratedContent(data.variations);
       
-      // Store content generation in database
+      // Store content generation in database with correct column names
       const contentToStore = data.variations.join('\n\n=== ပုံစံကွဲများ ===\n\n');
       
       await supabase.from('content_generations').insert({
         user_id: user.id,
         platform: platform || null,
         content_type: contentType,
-        content_length: contentLength,
+        length: contentLength, // Fixed: was content_length, now using correct column name
         objective: objective || null,
         tone: style,
         content_category: contentCategory,
