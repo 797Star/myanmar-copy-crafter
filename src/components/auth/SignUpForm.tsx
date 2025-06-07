@@ -23,48 +23,19 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleMode }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email.trim() || !password) {
-      setError('အီးမေးလ်နှင့် လျှို့ဝှက်နံပါတ် လိုအပ်ပါသည်။');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('လျှို့ဝှက်နံပါတ်သည် အနည်းဆုံး ၆ လုံး ရှိရမည်။');
-      return;
-    }
-
     setLoading(true);
     setError('');
     setMessage('');
 
-    try {
-      console.log('Sign up form submitting...');
-      const { error } = await signUp(email, password, fullName);
-      
-      if (error) {
-        console.error('Sign up error:', error);
-        if (error.message?.includes('User already registered')) {
-          setError('ဤအီးမေးလ်ဖြင့် အကောင့်ရှိပြီးသားဖြစ်ပါသည်။');
-        } else if (error.message?.includes('Password should be')) {
-          setError('လျှို့ဝှက်နံပါတ်သည် အနည်းဆုံး ၆ လုံး ရှိရမည်။');
-        } else {
-          setError(error.message || 'စာရင်းသွင်းရာတွင် အမှားရှိပါသည်။');
-        }
-      } else {
-        console.log('Sign up successful');
-        setMessage('စာရင်းသွင်းမှု အောင်မြင်ပါသည်! ကျေးဇူးပြု၍ သင့်အီးမေးလ်ကို စစ်ဆေးပါ။');
-        // Clear form
-        setEmail('');
-        setPassword('');
-        setFullName('');
-      }
-    } catch (err) {
-      console.error('Sign up exception:', err);
-      setError('စာရင်းသွင်းရာတွင် အမှားရှိပါသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။');
-    } finally {
-      setLoading(false);
+    const { error } = await signUp(email, password, fullName);
+    
+    if (error) {
+      setError(error.message);
+    } else {
+      setMessage('စာရင်းသွင်းမှု အောင်မြင်ပါသည်! ကျေးဇူးပြု၍ သင့်အီးမေးလ်ကို စစ်ဆေးပါ။');
     }
+    
+    setLoading(false);
   };
 
   return (
@@ -82,7 +53,6 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleMode }) => {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="သင့်အမည်"
-              disabled={loading}
             />
           </div>
           <div>
@@ -94,7 +64,6 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleMode }) => {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="your@email.com"
-              disabled={loading}
             />
           </div>
           <div>
@@ -106,10 +75,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleMode }) => {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              disabled={loading}
-              minLength={6}
             />
-            <p className="text-sm text-gray-500 mt-1">အနည်းဆုံး ၆ လုံး ရှိရမည်</p>
           </div>
           
           {error && (
@@ -126,7 +92,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleMode }) => {
           
           <Button type="submit" className="w-full" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {loading ? 'စာရင်းသွင်းနေသည်...' : 'စာရင်းသွင်းမည်'}
+            စာရင်းသွင်းမည်
           </Button>
           
           <Button 
@@ -134,7 +100,6 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleMode }) => {
             variant="link" 
             className="w-full"
             onClick={onToggleMode}
-            disabled={loading}
           >
             အကောင့်ရှိပြီးသားလား? လော့ဂ်အင်
           </Button>
