@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -10,7 +9,9 @@ import { useNavigate } from "react-router-dom";
 import ContentFormConfig from "@/components/ContentFormConfig";
 import GeneratedContentOutput from "@/components/GeneratedContentOutput";
 import QualityAssurance from "@/components/QualityAssurance";
-import UserMenu from "@/components/UserMenu";
+import FirebaseLogout from '@/components/FirebaseLogout';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { firebaseAuth } from '@/integrations/firebase/client';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
@@ -46,6 +47,12 @@ const Index = () => {
   const [error, setError] = useState('');
   const [generatedContent, setGeneratedContent] = useState<string[]>([]);
   const [qaMetrics, setQaMetrics] = useState<any>(null);
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(firebaseAuth, setFirebaseUser);
+    return () => unsubscribe();
+  }, []);
 
   const handleGenerateContent = async () => {
     if (!user) {
@@ -224,7 +231,7 @@ const Index = () => {
               <Sparkles className="h-10 w-10 text-purple-600" />
             </div>
             <div className="flex-1 flex justify-end">
-              <UserMenu />
+              {/* <UserMenu /> */}
             </div>
           </div>
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 bg-clip-text text-transparent mb-4">
@@ -311,6 +318,20 @@ const Index = () => {
               <QualityAssurance qaMetrics={qaMetrics} />
             </CardContent>
           </Card>
+        </div>
+
+        {/* User Info and Logout Button */}
+        <div className="mt-8 flex items-center justify-between">
+          <div>
+            {firebaseUser ? (
+              <span className="text-gray-700">
+                Signed in as: <span className="font-semibold">{firebaseUser.email}</span>
+              </span>
+            ) : (
+              <span className="text-gray-500">Not signed in</span>
+            )}
+          </div>
+          {firebaseUser && <FirebaseLogout />}
         </div>
       </div>
     </div>
