@@ -9,98 +9,86 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      content_generations: {
+      cities: {
         Row: {
-          business_page: string | null
-          content_type: string
-          created_at: string | null
-          generated_content: string
-          id: string
-          include_cta: boolean | null
-          include_emojis: boolean | null
-          include_hashtags: boolean | null
-          key_message: string | null
-          keywords: string | null
-          length: string
-          objective: string | null
-          platform: string | null
-          product_name: string | null
-          target_audience: string | null
-          tone: string
-          user_id: string
-          variations_count: number | null
+          country_id: number
+          id: number
+          name: string
         }
         Insert: {
-          business_page?: string | null
-          content_type: string
-          created_at?: string | null
-          generated_content: string
-          id?: string
-          include_cta?: boolean | null
-          include_emojis?: boolean | null
-          include_hashtags?: boolean | null
-          key_message?: string | null
-          keywords?: string | null
-          length: string
-          objective?: string | null
-          platform?: string | null
-          product_name?: string | null
-          target_audience?: string | null
-          tone: string
-          user_id: string
-          variations_count?: number | null
+          country_id: number
+          id?: never
+          name: string
         }
         Update: {
-          business_page?: string | null
-          content_type?: string
-          created_at?: string | null
-          generated_content?: string
-          id?: string
-          include_cta?: boolean | null
-          include_emojis?: boolean | null
-          include_hashtags?: boolean | null
-          key_message?: string | null
-          keywords?: string | null
-          length?: string
-          objective?: string | null
-          platform?: string | null
-          product_name?: string | null
-          target_audience?: string | null
-          tone?: string
-          user_id?: string
-          variations_count?: number | null
+          country_id?: number
+          id?: never
+          name?: string
         }
         Relationships: [
           {
-            foreignKeyName: "content_generations_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "cities_country_id_fkey"
+            columns: ["country_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "countries"
             referencedColumns: ["id"]
           },
         ]
       }
-      profiles: {
+      countries: {
         Row: {
-          created_at: string | null
-          email: string
-          full_name: string | null
-          id: string
-          updated_at: string | null
+          code: string
+          id: number
+          name: string
         }
         Insert: {
-          created_at?: string | null
-          email: string
-          full_name?: string | null
-          id: string
-          updated_at?: string | null
+          code: string
+          id?: never
+          name: string
         }
         Update: {
-          created_at?: string | null
-          email?: string
-          full_name?: string | null
-          id?: string
-          updated_at?: string | null
+          code?: string
+          id?: never
+          name?: string
+        }
+        Relationships: []
+      }
+      table_name: {
+        Row: {
+          data: Json | null
+          inserted_at: string
+          name: string | null
+          updated_at: string
+          user_id: number
+        }
+        Insert: {
+          data?: Json | null
+          inserted_at?: string
+          name?: string | null
+          updated_at?: string
+          user_id?: number
+        }
+        Update: {
+          data?: Json | null
+          inserted_at?: string
+          name?: string | null
+          updated_at?: string
+          user_id?: number
+        }
+        Relationships: []
+      }
+      user_id: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
         }
         Relationships: []
       }
