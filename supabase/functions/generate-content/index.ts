@@ -70,6 +70,8 @@ serve(async (req) => {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
   try {
+    const GEMINI_TIMEOUT_MS = 12000; // 12 seconds
+
     // Auth check - REMOVED BLOCK
     // const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
     // if (!authHeader) throw new Error('Authorization header required');
@@ -97,7 +99,12 @@ serve(async (req) => {
     if (!GEMINI_API_KEY) throw new Error('Gemini API key not configured');
     const contentGuidelines = getContentGuidelines(sanitizedBody.targetAudience, sanitizedBody.numVariations);
     const prompt = `${contentGuidelines}\n\nလက်ရှိ တောင်းဆိုမှု အချက်အလက်များ:\n\nPlatform: ${sanitizedBody.platform || 'မသတ်မှတ်ထားပါ'}\nContent Type: ${sanitizedBody.contentType}\nContent Length: ${sanitizedBody.contentLength}\nObjective: ${sanitizedBody.objective || 'မသတ်မှတ်ထားပါ'}\nStyle/Tone: ${sanitizedBody.style}\nContent Category: ${sanitizedBody.contentCategory}\nProduct/Service Name: ${sanitizedBody.productName || 'မရှိပါ'}\nKey Message/Details: ${sanitizedBody.keyMessage || 'မရှိပါ'}\nTarget Audience: ${sanitizedBody.targetAudience || 'ယေဘုယျ လူထု'}\nKeywords: ${sanitizedBody.keywords || 'မရှိပါ'}\nFacebook Page Link: ${sanitizedBody.facebookPageLink || 'မရှိပါ'}\nInclude CTA: ${sanitizedBody.includeCTA ? 'ပါဝင်မည်' : 'မပါဝင်ပါ'}\nInclude Emojis: ${sanitizedBody.includeEmojis ? 'ပါဝင်မည်' : 'မပါဝင်ပါ'}\nInclude Hashtags: ${sanitizedBody.includeHashtags ? 'ပါဝင်မည်' : 'မပါဝင်ပါ'}\nNumber of Variations: ${sanitizedBody.numVariations}\n\nကျေးဇူးပြု၍ ${sanitizedBody.numVariations} ခုသော မတူညီသော content variations များကို အထက်ပါ ပရော်ဖက်ရှင်နယ် ရေးသားမှုပုံစံများဖြင့် ရေးပေးပါ။ \n\nတစ်ခုစီကို "===VARIATION_START===" နှင့် "===VARIATION_END===" ဖြင့် ပိုင်းခြားပေးပါ။\n\nမြန်မာဘာသာဖြင့်သာ response ပေးပါ။`;
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`, {
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Gemini API call timed out')), GEMINI_TIMEOUT_MS)
+    );
+
+    const fetchPromise = fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -105,10 +112,26 @@ serve(async (req) => {
         generationConfig: { temperature: 0.8, topK: 40, topP: 0.95, maxOutputTokens: 2048 }
       })
     });
+
+    // Typecasting response to 'any' initially because Promise.race returns Promise<any>
+    // and then we'll check its properties. Or ensure timeoutPromise resolves to a Response-like error structure.
+    // However, since timeoutPromise rejects, 'response' will be the actual Response if fetch wins.
+    const response: Response = await Promise.race([fetchPromise, timeoutPromise]);
+
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+      let errorDetail = `Gemini API error: ${response.status}`;
+      try {
+        // Only try to read text if response is a Response object and not an error from timeout
+        if (response instanceof Response) {
+          const errorText = await response.text();
+          errorDetail += ` - ${errorText}`;
+        }
+      } catch (textError) {
+        // Ignore if cannot read text, primary error is status or timeout message
+      }
+      throw new Error(errorDetail);
     }
+
     const data = await response.json();
     if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) throw new Error('Invalid response from Gemini API');
     const generatedText = data.candidates[0].content.parts[0].text;
