@@ -99,34 +99,39 @@ const Index = () => {
       console.log('Content generated successfully:', data.variations.length, 'variations');
       setGeneratedContent(data.variations);
       
-      // Store content generation in database with correct column names
+      // Store content generation in database using raw SQL to avoid type issues
       const contentToStore = data.variations.join('\n\n=== ပုံစံကွဲများ ===\n\n');
       
-      const insertResult = await supabase.from('content_generations').insert({
-        user_id: user.id,
-        platform: platform || null,
-        content_type: contentType,
-        length: contentLength, // Fixed: was content_length, now using correct column name
-        objective: objective || null,
-        tone: style,
-        content_category: contentCategory,
-        product_name: productName || null,
-        key_message: keyMessage || null,
-        target_audience: targetAudience || null,
-        keywords: keywords || null,
-        business_page: facebookPageLink || null,
-        include_cta: includeCTA,
-        include_emojis: includeEmojis,
-        include_hashtags: includeHashtags,
-        variations_count: numVariations,
-        generated_content: contentToStore
-      });
+      try {
+        const { error: insertError } = await supabase.rpc('insert_content_generation', {
+          p_user_id: user.id,
+          p_platform: platform || null,
+          p_content_type: contentType,
+          p_length: contentLength,
+          p_objective: objective || null,
+          p_tone: style,
+          p_content_category: contentCategory,
+          p_product_name: productName || null,
+          p_key_message: keyMessage || null,
+          p_target_audience: targetAudience || null,
+          p_keywords: keywords || null,
+          p_business_page: facebookPageLink || null,
+          p_include_cta: includeCTA,
+          p_include_emojis: includeEmojis,
+          p_include_hashtags: includeHashtags,
+          p_variations_count: numVariations,
+          p_generated_content: contentToStore
+        });
 
-      if (insertResult.error) {
-        console.error('Database insert error:', insertResult.error);
-        // Don't throw here, just log the error as the content generation was successful
-      } else {
-        console.log('Content saved to database successfully');
+        if (insertError) {
+          console.error('Database insert error:', insertError);
+          // Don't throw here, just log the error as the content generation was successful
+        } else {
+          console.log('Content saved to database successfully');
+        }
+      } catch (dbError) {
+        console.error('Database operation failed:', dbError);
+        // Continue with the rest of the flow even if DB save fails
       }
       
       // Generate mock QA metrics

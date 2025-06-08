@@ -35,6 +35,75 @@ export type Database = {
           },
         ]
       }
+      content_generations: {
+        Row: {
+          business_page: string | null
+          content_category: string
+          content_type: string
+          created_at: string
+          generated_content: string
+          id: string
+          include_cta: boolean
+          include_emojis: boolean
+          include_hashtags: boolean
+          key_message: string | null
+          keywords: string | null
+          length: string
+          objective: string | null
+          platform: string | null
+          product_name: string | null
+          target_audience: string | null
+          tone: string
+          updated_at: string
+          user_id: string
+          variations_count: number
+        }
+        Insert: {
+          business_page?: string | null
+          content_category: string
+          content_type: string
+          created_at?: string
+          generated_content: string
+          id?: string
+          include_cta?: boolean
+          include_emojis?: boolean
+          include_hashtags?: boolean
+          key_message?: string | null
+          keywords?: string | null
+          length: string
+          objective?: string | null
+          platform?: string | null
+          product_name?: string | null
+          target_audience?: string | null
+          tone: string
+          updated_at?: string
+          user_id: string
+          variations_count?: number
+        }
+        Update: {
+          business_page?: string | null
+          content_category?: string
+          content_type?: string
+          created_at?: string
+          generated_content?: string
+          id?: string
+          include_cta?: boolean
+          include_emojis?: boolean
+          include_hashtags?: boolean
+          key_message?: string | null
+          keywords?: string | null
+          length?: string
+          objective?: string | null
+          platform?: string | null
+          product_name?: string | null
+          target_audience?: string | null
+          tone?: string
+          updated_at?: string
+          user_id?: string
+          variations_count?: number
+        }
+        Relationships: []
+      }
       countries: {
         Row: {
           code: string
