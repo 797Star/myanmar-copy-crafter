@@ -24,14 +24,14 @@ interface RequestBody {
   includeEmojis: boolean;
   includeHashtags: boolean;
   numVariations: number;
-  userId: string;
+  userId?: string; // Made optional
 }
 
 function validateInput(body: RequestBody): string | null {
   if (!body.contentType || typeof body.contentType !== 'string') return 'Content type is required';
   if (!body.contentLength || typeof body.contentLength !== 'string') return 'Content length is required';
   if (!body.style || typeof body.style !== 'string') return 'Style is required';
-  if (!body.userId || typeof body.userId !== 'string') return 'User authentication required';
+  // if (!body.userId || typeof body.userId !== 'string') return 'User authentication required'; // Removed
   if (body.numVariations < 1 || body.numVariations > 3) return 'Number of variations must be between 1 and 3';
   const maxLengths = { productName: 200, keyMessage: 2000, targetAudience: 1000, keywords: 500, facebookPageLink: 300 };
   if (body.productName && body.productName.length > maxLengths.productName) return `Product name too long (max ${maxLengths.productName} characters)`;
@@ -70,18 +70,19 @@ serve(async (req) => {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
   try {
-    // Auth check
-    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
-    if (!authHeader) throw new Error('Authorization header required');
-    const supabaseClient = createClient(
-      (typeof globalThis !== "undefined" && typeof (globalThis as any).Deno !== "undefined" && (globalThis as any).Deno.env.get('SUPABASE_URL')) || process.env.SUPABASE_URL || '',
-      (typeof globalThis !== "undefined" && typeof (globalThis as any).Deno !== "undefined" && (globalThis as any).Deno.env.get('SUPABASE_ANON_KEY')) || process.env.SUPABASE_ANON_KEY || '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    if (authError || !user) throw new Error('User not authenticated');
+    // Auth check - REMOVED BLOCK
+    // const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
+    // if (!authHeader) throw new Error('Authorization header required');
+    // const supabaseClient = createClient(
+    //   (typeof globalThis !== "undefined" && typeof (globalThis as any).Deno !== "undefined" && (globalThis as any).Deno.env.get('SUPABASE_URL')) || process.env.SUPABASE_URL || '',
+    //   (typeof globalThis !== "undefined" && typeof (globalThis as any).Deno !== "undefined" && (globalThis as any).Deno.env.get('SUPABASE_ANON_KEY')) || process.env.SUPABASE_ANON_KEY || '',
+    //   { global: { headers: { Authorization: authHeader } } }
+    // );
+    // const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    // if (authError || !user) throw new Error('User not authenticated');
+
     const body: RequestBody = await req.json();
-    if (body.userId !== user.id) throw new Error('User ID mismatch');
+    // if (body.userId !== user.id) throw new Error('User ID mismatch'); // Removed, user object no longer exists here
     const validationError = validateInput(body);
     if (validationError) throw new Error(validationError);
     const sanitizedBody = {
@@ -134,7 +135,7 @@ serve(async (req) => {
     }
     const finalVariations = variations.slice(0, sanitizedBody.numVariations);
     return new Response(
-      JSON.stringify({ success: true, variations: finalVariations, userId: user.id }),
+      JSON.stringify({ success: true, variations: finalVariations }), // Removed userId from response
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
