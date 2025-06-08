@@ -4,7 +4,7 @@ import { getAuth } from 'firebase/auth';
 
 // Add this before initializeAppCheck for local development
 // @ts-ignore
-self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+self.FIREBASE_APPCHECK_DEBUG_TOKEN = "1A381BB4-E81B-4E96-92FF-52AF2F14D0F7";
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 const firebaseConfig = {
@@ -18,6 +18,6 @@ const app = initializeApp(firebaseConfig);
 export const firebaseAuth = getAuth(app);
 
 const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider('your-public-recaptcha-site-key'),
+  provider: new ReCaptchaV3Provider('6LeZdFkrAAAAAFXQkhMZ1t4bu2B_GQ-15BH8iQJU'),
   isTokenAutoRefreshEnabled: true,
 });
