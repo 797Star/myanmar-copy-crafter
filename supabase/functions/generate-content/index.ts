@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
+import { createClient } from "https://deno.land/x/supabase_js@2.39.7/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -74,8 +74,8 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
     if (!authHeader) throw new Error('Authorization header required');
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      (typeof globalThis !== "undefined" && typeof (globalThis as any).Deno !== "undefined" && (globalThis as any).Deno.env.get('SUPABASE_URL')) || process.env.SUPABASE_URL || '',
+      (typeof globalThis !== "undefined" && typeof (globalThis as any).Deno !== "undefined" && (globalThis as any).Deno.env.get('SUPABASE_ANON_KEY')) || process.env.SUPABASE_ANON_KEY || '',
       { global: { headers: { Authorization: authHeader } } }
     );
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
@@ -92,7 +92,7 @@ serve(async (req) => {
       keywords: body.keywords ? sanitizeInput(body.keywords) : '',
       facebookPageLink: body.facebookPageLink ? sanitizeInput(body.facebookPageLink) : '',
     };
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    const GEMINI_API_KEY = (typeof globalThis !== "undefined" && typeof (globalThis as any).Deno !== "undefined" && (globalThis as any).Deno.env.get('GEMINI_API_KEY')) || process.env.GEMINI_API_KEY;
     if (!GEMINI_API_KEY) throw new Error('Gemini API key not configured');
     const contentGuidelines = getContentGuidelines(sanitizedBody.targetAudience, sanitizedBody.numVariations);
     const prompt = `${contentGuidelines}\n\nလက်ရှိ တောင်းဆိုမှု အချက်အလက်များ:\n\nPlatform: ${sanitizedBody.platform || 'မသတ်မှတ်ထားပါ'}\nContent Type: ${sanitizedBody.contentType}\nContent Length: ${sanitizedBody.contentLength}\nObjective: ${sanitizedBody.objective || 'မသတ်မှတ်ထားပါ'}\nStyle/Tone: ${sanitizedBody.style}\nContent Category: ${sanitizedBody.contentCategory}\nProduct/Service Name: ${sanitizedBody.productName || 'မရှိပါ'}\nKey Message/Details: ${sanitizedBody.keyMessage || 'မရှိပါ'}\nTarget Audience: ${sanitizedBody.targetAudience || 'ယေဘုယျ လူထု'}\nKeywords: ${sanitizedBody.keywords || 'မရှိပါ'}\nFacebook Page Link: ${sanitizedBody.facebookPageLink || 'မရှိပါ'}\nInclude CTA: ${sanitizedBody.includeCTA ? 'ပါဝင်မည်' : 'မပါဝင်ပါ'}\nInclude Emojis: ${sanitizedBody.includeEmojis ? 'ပါဝင်မည်' : 'မပါဝင်ပါ'}\nInclude Hashtags: ${sanitizedBody.includeHashtags ? 'ပါဝင်မည်' : 'မပါဝင်ပါ'}\nNumber of Variations: ${sanitizedBody.numVariations}\n\nကျေးဇူးပြု၍ ${sanitizedBody.numVariations} ခုသော မတူညီသော content variations များကို အထက်ပါ ပရော်ဖက်ရှင်နယ် ရေးသားမှုပုံစံများဖြင့် ရေးပေးပါ။ \n\nတစ်ခုစီကို "===VARIATION_START===" နှင့် "===VARIATION_END===" ဖြင့် ပိုင်းခြားပေးပါ။\n\nမြန်မာဘာသာဖြင့်သာ response ပေးပါ။`;
@@ -144,6 +144,23 @@ serve(async (req) => {
     );
   }
 });
+
+interface ContentRequest {
+  platform: string;
+  contentType: string;
+  contentLength: string;
+  objective: string;
+  style: string;
+  contentCategory: string;
+  productName: string;
+  keyMessage: string;
+  targetAudience: string;
+  keywords: string;
+  includeCTA: boolean;
+  includeEmojis: boolean;
+  includeHashtags: boolean;
+  numVariations: number;
+}
 
 function buildPrompt(request: ContentRequest): string {
   const {
