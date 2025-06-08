@@ -106,18 +106,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    setLoading(true);
     try {
       console.log('Signing out...');
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Sign out error:', error);
+        return { error };
       } else {
         console.log('Sign out successful');
-        // Force navigation to auth page
+        // setUser(null); // Handled by onAuthStateChange
+        // setSession(null); // Handled by onAuthStateChange
+        // Force navigation to auth page after state change has likely propagated
         window.location.href = '/auth';
+        return { error: null };
       }
     } catch (err) {
       console.error('Sign out exception:', err);
+      return { error: err };
+    } finally {
+      // Setting loading to false might be tricky if redirect happens immediately
+      // However, onAuthStateChange will also set loading to false.
+      // If redirect is very fast, this might not even be noticeable.
+      setLoading(false);
     }
   };
 

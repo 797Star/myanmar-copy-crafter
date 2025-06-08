@@ -29,6 +29,10 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleMode }) => {
       return;
     }
 
+    // Clear previous non-critical errors before new validation
+    setError('');
+    setMessage('');
+
     if (password.length < 6) {
       setError('လျှို့ဝှက်နံပါတ်သည် အနည်းဆုံး ၆ လုံး ရှိရမည်။');
       return;
@@ -109,7 +113,8 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleMode }) => {
               disabled={loading}
               minLength={6}
             />
-            <p className="text-sm text-gray-500 mt-1">အနည်းဆုံး ၆ လုံး ရှိရမည်</p>
+            {/* Password hint can remain or be removed if error message is preferred */}
+            <p className="text-sm text-muted-foreground mt-1">အနည်းဆုံး ၆ လုံး ရှိရမည်။</p>
           </div>
           
           {error && (
@@ -119,7 +124,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleMode }) => {
           )}
           
           {message && (
-            <Alert>
+            <Alert variant="success">
               <AlertDescription>{message}</AlertDescription>
             </Alert>
           )}
