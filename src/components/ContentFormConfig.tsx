@@ -95,7 +95,7 @@ const ContentFormConfig: React.FC<ContentFormConfigProps> = ({
       <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
         <CardTitle className="text-2xl font-bold flex items-center gap-3">
           <Sparkles className="h-6 w-6" />
-          အකြောင်းအရာ ပြင်ဆင်ချက်များ
+          အကြောင်းအရာ ပြင်ဆင်ချက်များ
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-8 p-8">
@@ -190,6 +190,7 @@ const ContentFormConfig: React.FC<ContentFormConfigProps> = ({
                 <SelectValue placeholder="အမျိုးအစားခွဲ ရွေးချယ်ပါ" />
               </SelectTrigger>
               <SelectContent className="bg-white border-2 border-blue-200 shadow-xl">
+                <SelectItem value="professional-ad" className="text-lg py-3">🎯 ပရော်ဖက်ရှင်နယ် ကြော်ငြာအကြောင်းအရာ (3 ပုံစံ)</SelectItem>
                 <SelectItem value="promotion" className="text-lg py-3">🚀 ထုတ်ကုန်/ဝန်ဆောင်မှု အရောင်းမြှင့်တင်ခြင်းများ</SelectItem>
                 <SelectItem value="info" className="text-lg py-3">📢 သတင်းအချက်အလက် ပေးခြင်း</SelectItem>
                 <SelectItem value="seasonal" className="text-lg py-3">🌸 ရာသီအလိုက် အကြောင်းအရာများ</SelectItem>
@@ -198,6 +199,19 @@ const ContentFormConfig: React.FC<ContentFormConfigProps> = ({
             </Select>
           </div>
         </div>
+
+        {/* Professional Ad Content Notice */}
+        {contentCategory === 'professional-ad' && (
+          <Alert className="border-blue-300 bg-gradient-to-r from-blue-50 to-purple-50 shadow-lg">
+            <Sparkles className="h-5 w-5 text-blue-600" />
+            <AlertDescription className="text-blue-800 text-lg font-medium">
+              🎯 ပရော်ဖက်ရှင်နယ် ကြော်ငြာ ဖွဲ့စည်းပုံ ရွေးချယ်ထားပါသည်။ AI သည် 3 မျိုးသော ရေးသားမှုပုံစံဖြင့် အကြောင်းအရာများ ဖန်တီးပေးမည်:
+              <br />• 50% ကုန်ပစ္စည်းမြှင့်တင်မှု + 50% အသိပညာ ဝေမျှမှု
+              <br />• 30% ကုန်ပစ္စည်းမြှင့်တင်မှု + 70% အသိပညာ ဝေမျှမှု  
+              <br />• 70% ကုန်ပစ္စည်းမြှင့်တင်မှု + 30% အသိပညာ ဝေမျှမှု
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Product/Service Name */}
         <div className="space-y-3">
@@ -304,6 +318,11 @@ const ContentFormConfig: React.FC<ContentFormConfigProps> = ({
             onChange={(e) => setNumVariations(Math.max(1, Math.min(3, parseInt(e.target.value) || 1)))}
             className="h-12 text-lg border-2 border-blue-200 focus:border-blue-500 bg-white/80"
           />
+          {contentCategory === 'professional-ad' && (
+            <p className="text-sm text-blue-600 mt-2">
+              💡 ပရော်ဖက်ရှင်နယ် ကြော်ငြာအတွက် ၃ မျိုးသော ရေးသားမှုပုံစံ လိုအပ်သဖြင့် ပုံစံကွဲ ၃ ခု ရွေးချယ်ရန် အကြံပြုပါသည်။
+            </p>
+          )}
         </div>
 
         {/* Generate Button */}
