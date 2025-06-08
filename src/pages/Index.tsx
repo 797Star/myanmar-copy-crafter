@@ -4,28 +4,28 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { toast } from "sonner";
 import { AlertCircle, Sparkles, Bot } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/auth/AuthProvider";
-import { useNavigate } from "react-router-dom";
+// import { useAuth } from "@/components/auth/AuthProvider"; // Removed
+// import { useNavigate } from "react-router-dom"; // Removed as navigate was only used for auth redirect
 import ContentFormConfig from "@/components/ContentFormConfig";
 import GeneratedContentOutput from "@/components/GeneratedContentOutput";
 import QualityAssurance from "@/components/QualityAssurance";
-import FirebaseLogout from '@/components/FirebaseLogout';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { firebaseAuth } from '@/integrations/firebase/client';
+// import FirebaseLogout from '@/components/FirebaseLogout'; // Removed
+// import { onAuthStateChanged, User } from 'firebase/auth'; // Removed
+// import { firebaseAuth } from '@/integrations/firebase/client'; // Removed
 
 const Index = () => {
-  const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
+  // const { user, loading: authLoading } = useAuth(); // Removed
+  // const navigate = useNavigate(); // Removed
 
   // Redirect to auth if not logged in, but only after auth loading is complete
-  useEffect(() => {
-    console.log('Auth state:', { user: user?.email, authLoading });
-    
-    if (!authLoading && !user) {
-      console.log('User not authenticated, redirecting to auth...');
-      navigate('/auth');
-    }
-  }, [user, authLoading, navigate]);
+  // useEffect(() => { // Removed
+  //   console.log('Auth state:', { user: user?.email, authLoading });
+  //
+  //   if (!authLoading && !user) {
+  //     console.log('User not authenticated, redirecting to auth...');
+  //     navigate('/auth');
+  //   }
+  // }, [user, authLoading, navigate]);
 
   // State management
   const [platform, setPlatform] = useState('');
@@ -47,19 +47,19 @@ const Index = () => {
   const [error, setError] = useState('');
   const [generatedContent, setGeneratedContent] = useState<string[]>([]);
   const [qaMetrics, setQaMetrics] = useState<any>(null);
-  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+  // const [firebaseUser, setFirebaseUser] = useState<User | null>(null); // Removed
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(firebaseAuth, setFirebaseUser);
-    return () => unsubscribe();
-  }, []);
+  // useEffect(() => { // Removed
+  //   const unsubscribe = onAuthStateChanged(firebaseAuth, setFirebaseUser);
+  //   return () => unsubscribe();
+  // }, []);
 
   const handleGenerateContent = async () => {
-    if (!user) {
-      console.error('No user found when trying to generate content');
-      setError('ကျေးဇူးပြု၍ အရင်လော့ဂ်အင်ဝင်ပါ');
-      return;
-    }
+    // if (!user) { // Removed
+    //   console.error('No user found when trying to generate content');
+    //   setError('ကျေးဇူးပြု၍ အရင်လော့ဂ်အင်ဝင်ပါ');
+    //   return;
+    // }
 
     // Validation
     if (!productName && !keyMessage && !['seasonal', 'brand-awareness'].includes(contentCategory)) {
@@ -71,7 +71,8 @@ const Index = () => {
     setError('');
 
     try {
-      console.log('Generating content for user:', user.email);
+      // console.log('Generating content for user:', user.email); // Removed
+      console.log('Generating content...');
       
       const { data, error } = await supabase.functions.invoke('generate-content', {
         body: {
@@ -90,7 +91,7 @@ const Index = () => {
           includeEmojis,
           includeHashtags,
           numVariations,
-          userId: user.id
+          // userId: user.id // Removed
         }
       });
 
@@ -111,7 +112,7 @@ const Index = () => {
       
       try {
         const { error: insertError } = await supabase.rpc('insert_content_generation', {
-          p_user_id: user.id,
+          // p_user_id: user.id, // Removed
           p_platform: platform || null,
           p_content_type: contentType,
           p_length: contentLength,
@@ -200,24 +201,25 @@ const Index = () => {
   };
 
   // Show loading while checking auth
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-amber-50 flex items-center justify-center">
-        <div className="text-center">
-          <Bot className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-pulse" />
-          <p className="text-lg text-gray-600">တင်နေသည်...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (authLoading) { // Removed
+  //   return (
+  //     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-amber-50 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <Bot className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-pulse" />
+  //         <p className="text-lg text-gray-600">တင်နေသည်...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // Don't render if not authenticated (will redirect)
-  if (!user) {
-    console.log('User not found, not rendering main content');
-    return null;
-  }
+  // if (!user) { // Removed
+  //   console.log('User not found, not rendering main content');
+  //   return null;
+  // }
 
-  console.log('Rendering main app for user:', user.email);
+  // console.log('Rendering main app for user:', user.email); // Removed
+  console.log('Rendering main app...');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-amber-50 p-4">
@@ -244,9 +246,9 @@ const Index = () => {
             <span>Powered by</span>
             <span className="font-semibold text-blue-600">Gemini 2.5 Flash Preview</span>
           </div>
-          <div className="mt-2 text-sm text-green-600">
+          {/* <div className="mt-2 text-sm text-green-600"> // Removed
             လက်ရှိအသုံးပြုသူ: {user.email}
-          </div>
+          </div> */}
         </div>
 
         {/* API Connection Status */}
@@ -321,7 +323,7 @@ const Index = () => {
         </div>
 
         {/* User Info and Logout Button */}
-        <div className="mt-8 flex items-center justify-between">
+        {/* <div className="mt-8 flex items-center justify-between"> // Removed
           <div>
             {firebaseUser ? (
               <span className="text-gray-700">
@@ -332,7 +334,7 @@ const Index = () => {
             )}
           </div>
           {firebaseUser && <FirebaseLogout />}
-        </div>
+        </div> */}
       </div>
     </div>
   );
