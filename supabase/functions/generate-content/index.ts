@@ -184,37 +184,57 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting generate-content function...');
+
+    // Get authorization header
+    const authHeader = req.headers.get('Authorization');
+    console.log('Auth header present:', !!authHeader);
+
+    if (!authHeader) {
+      console.error('No authorization header provided');
+      throw new Error('Authorization header required');
+    }
+
+    // Create Supabase client with the authorization header
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
+          headers: { Authorization: authHeader },
         },
       }
     );
 
     // Verify user authentication
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('Authorization header required');
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    console.log('Auth check result:', { user: user?.id, error: authError?.message });
+
+    if (authError) {
+      console.error('Auth error:', authError);
+      throw new Error(`Authentication failed: ${authError.message}`);
     }
 
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    if (authError || !user) {
-      throw new Error('Authentication failed');
+    if (!user) {
+      console.error('No user found after auth check');
+      throw new Error('User not authenticated');
     }
+
+    console.log('User authenticated successfully:', user.id);
 
     const body: RequestBody = await req.json();
+    console.log('Request body received for user:', user.id);
     
     // Validate user ID matches authenticated user
     if (body.userId !== user.id) {
+      console.error('User ID mismatch:', { bodyUserId: body.userId, authUserId: user.id });
       throw new Error('User ID mismatch');
     }
     
     // Validate input
     const validationError = validateInput(body);
     if (validationError) {
+      console.error('Validation error:', validationError);
       throw new Error(validationError);
     }
 
@@ -230,6 +250,7 @@ serve(async (req) => {
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
+      console.error('Gemini API key not configured');
       throw new Error('Gemini API key not configured');
     }
 
@@ -295,6 +316,7 @@ Number of Variations: ${sanitizedBody.numVariations}
     console.log('Received response from Gemini API');
     
     if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+      console.error('Invalid Gemini API response structure');
       throw new Error('Invalid response from Gemini API');
     }
 
@@ -331,7 +353,7 @@ Number of Variations: ${sanitizedBody.numVariations}
     
     const finalVariations = variations.slice(0, sanitizedBody.numVariations);
 
-    console.log(`Generated ${finalVariations.length} professional ad content variations`);
+    console.log(`Generated ${finalVariations.length} professional ad content variations for user: ${user.id}`);
 
     return new Response(
       JSON.stringify({ 
