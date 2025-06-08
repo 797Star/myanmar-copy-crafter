@@ -1,16 +1,23 @@
-import React from 'react';
-import FirebaseLogin from '@/components/FirebaseLogin';
+import React, { useState } from 'react';
+import LoginForm from '@/components/auth/LoginForm';
+import SignUpForm from '@/components/auth/SignUpForm';
 
-// You can keep the old UI as a fallback or for future use if needed
-// import { Bot, Sparkles } from 'lucide-react';
-// import LoginForm from '@/components/auth/LoginForm';
-// import SignUpForm from '@/components/auth/SignUpForm';
+const AuthPage: React.FC = () => {
+  const [showLogin, setShowLogin] = useState(true);
 
-const AuthPage: React.FC = () => (
-  <div style={{ maxWidth: 400, margin: 'auto', padding: 32 }}>
-    <h2>Sign in with Firebase</h2>
-    <FirebaseLogin />
-  </div>
-);
+  const toggleMode = () => {
+    setShowLogin(!showLogin);
+  };
+
+  return (
+    <div style={{ maxWidth: 400, margin: 'auto', padding: '32px 16px' }}>
+      {showLogin ? (
+        <LoginForm onToggleMode={toggleMode} />
+      ) : (
+        <SignUpForm onToggleMode={toggleMode} />
+      )}
+    </div>
+  );
+};
 
 export default AuthPage;
